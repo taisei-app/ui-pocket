@@ -21,39 +21,11 @@ class TableCalendarSample extends StatelessWidget {
           ),
         ),
       ),
-      body: Column(
+      body: const Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: _CustomCalendar(),
-          ),
-          const Spacer(),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 100,
-                color: Colors.white,
-              ),
-              SizedBox(
-                width: 300,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                  ),
-                  child: const Text(
-                    "この日付で絞り込む",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
+          _CustomCalendar(),
+          Spacer(),
+          _ButtonSection(),
         ],
       ),
     );
@@ -69,12 +41,32 @@ class _CustomCalendar extends StatefulWidget {
 }
 
 class _CustomCalendarState extends State<_CustomCalendar> {
-  final today = DateTime.now();
-  DateTime get lastDay => today.add(const Duration(days: 59));
-  late var focusedDay = today;
+  // 本日の日付
+  late final DateTime today;
+  // 最終日（本日の日付を含め60日間）
+  late final DateTime lastDay;
+  // 選択中の日付（初期値は本日の日付）
+  late DateTime focusedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    today = DateTime.now();
+    focusedDay = today;
+    lastDay = today.add(const Duration(days: 59));
+  }
 
   @override
   Widget build(BuildContext context) {
+    final prevMonthLastDay = DateTime(focusedDay.year, focusedDay.month, 0);
+    final enableMovePrevMonth = prevMonthLastDay.isAfter(today) ||
+        prevMonthLastDay.isAtSameMomentAs(today);
+
+    final nextMonthFirstDay =
+        DateTime(focusedDay.year, focusedDay.month + 1, 1);
+    final enableMoveNextMonth = nextMonthFirstDay.isBefore(lastDay) ||
+        nextMonthFirstDay.isAtSameMomentAs(lastDay);
+
     return TableCalendar(
       // 曜日の高さ
       daysOfWeekHeight: 32,
@@ -90,9 +82,42 @@ class _CustomCalendarState extends State<_CustomCalendar> {
         ),
       ),
       // ヘッダーのスタイル
-      headerStyle: const HeaderStyle(
+      headerStyle: HeaderStyle(
         // 2 weeksボタンを非表示
         formatButtonVisible: false,
+        leftChevronIcon: GestureDetector(
+          onTap: () {
+            if (enableMovePrevMonth) {
+              final prevFocusedDay =
+                  focusedDay.subtract(const Duration(days: 30));
+              setState(() {
+                focusedDay =
+                    prevFocusedDay.isAfter(today) ? prevFocusedDay : today;
+              });
+            }
+          },
+          child: Icon(
+            Icons.arrow_back_ios_rounded,
+            color: enableMovePrevMonth ? const Color(0xff222222) : Colors.grey,
+            size: 20,
+          ),
+        ),
+        rightChevronIcon: GestureDetector(
+          onTap: () {
+            if (enableMoveNextMonth) {
+              final nextFocusedDay = focusedDay.add(const Duration(days: 30));
+              setState(() {
+                focusedDay =
+                    nextFocusedDay.isBefore(lastDay) ? nextFocusedDay : lastDay;
+              });
+            }
+          },
+          child: Icon(
+            Icons.arrow_forward_ios_rounded,
+            color: enableMoveNextMonth ? const Color(0xff222222) : Colors.grey,
+            size: 20,
+          ),
+        ),
       ),
       // 表示するカレンダーは現在日時から60日間表示
       firstDay: today,
@@ -104,6 +129,12 @@ class _CustomCalendarState extends State<_CustomCalendar> {
           focusedDay = selectDay;
         });
       },
+      onPageChanged: (selectedDay) {
+        setState(() {
+          focusedDay = selectedDay;
+        });
+      },
+      selectedDayPredicate: (day) => isSameDay(day, focusedDay),
       calendarBuilders: CalendarBuilders(
         headerTitleBuilder: (_, day) {
           return Center(
@@ -115,28 +146,38 @@ class _CustomCalendarState extends State<_CustomCalendar> {
             ),
           );
         },
+        selectedBuilder: (context, day, focusedDay) {
+          return Container(
+            margin: const EdgeInsets.all(0.5),
+            alignment: Alignment.center,
+            color: Colors.black,
+            child: Text(
+              day.day.toString(),
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          );
+        },
         todayBuilder: (_, day, focusedDay) => _CustomCell(
           today: today,
           day: day,
-          focusedDay: focusedDay,
           lastDay: lastDay,
         ),
         defaultBuilder: (_, day, focusedDay) => _CustomCell(
           today: today,
           day: day,
-          focusedDay: focusedDay,
           lastDay: lastDay,
         ),
         disabledBuilder: (_, day, focusedDay) => _CustomCell(
           today: today,
           day: day,
-          focusedDay: focusedDay,
           lastDay: lastDay,
         ),
         outsideBuilder: (_, day, focusedDay) => _CustomCell(
           today: today,
           day: day,
-          focusedDay: focusedDay,
           lastDay: lastDay,
         ),
       ),
@@ -150,7 +191,6 @@ class _CustomCell extends StatelessWidget {
     required this.today,
     required this.lastDay,
     required this.day,
-    required this.focusedDay,
   });
 
   // 本日の日付
@@ -162,18 +202,13 @@ class _CustomCell extends StatelessWidget {
   // 各セルの日付
   final DateTime day;
 
-  // 選択中の日付
-  final DateTime focusedDay;
-
-  // 選択された日付かどうか
-  bool get isFocusedDay =>
-      focusedDay.year == day.year &&
-      focusedDay.month == day.month &&
-      focusedDay.day == day.day;
-
   // 本日より前の日付か
   bool get isBeforeToday => day.isBefore(
-        DateTime(today.year, today.month, today.day),
+        DateTime(
+          today.year,
+          today.month,
+          today.day,
+        ),
       );
 
   // 表示最終日以降の日付か
@@ -190,16 +225,52 @@ class _CustomCell extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(0.5),
       alignment: Alignment.center,
-      color: isFocusedDay ? Colors.black : Colors.white,
+      color: Colors.white,
       child: Text(
         day.day.toString(),
         style: TextStyle(
           fontWeight: FontWeight.w600,
-          color: isFocusedDay
-              ? Colors.white
-              : (isBeforeToday || isAfterLastDay ? Colors.grey : Colors.black),
+          color: (isBeforeToday || isAfterLastDay ? Colors.grey : Colors.black),
         ),
       ),
+    );
+  }
+}
+
+// 絞り込みボタン
+class _ButtonSection extends StatelessWidget {
+  const _ButtonSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: 100,
+          color: Colors.white,
+        ),
+        SizedBox(
+          width: 300,
+          child: ElevatedButton(
+            onPressed: () {
+              // 日付絞り込みボタン押下時の処理
+              // focusedDayで絞り込みを行う
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+            ),
+            child: const Text(
+              "この日付で絞り込む",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }
