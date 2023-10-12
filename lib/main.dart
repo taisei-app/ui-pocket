@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:ui_pocket/calendar/table_calendar_sample.dart';
 import 'package:ui_pocket/stepper/custom_stepper.dart';
 
 void main() {
-  runApp(const MyApp());
+  initializeDateFormatting().then(
+    (_) => runApp(
+      const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +22,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(),
+      home: const TableCalendarSample(),
     );
   }
 }
