@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui_pocket/stepper/custom_stepper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,10 +36,21 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("UI POCKET"),
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[],
+          children: <Widget>[
+            CustomStepper(
+              steps: 3,
+              currentStep: 2,
+              texts: [
+                "電話番号\n認証",
+                "パスワード\n設定",
+                "希望条件\n設定",
+              ],
+              borderWidth: 3,
+            ),
+          ],
         ),
       ),
     );
