@@ -58,15 +58,15 @@ class _CustomCalendarState extends State<_CustomCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    final nextMonthFirstDay =
-        DateTime(focusedDay.year, focusedDay.month + 1, 1);
-    final prevMonthFirstDay =
-        DateTime(focusedDay.year, focusedDay.month - 1, 1);
+    // final nextMonthFirstDay =
+    //     DateTime(focusedDay.year, focusedDay.month + 1, 1);
+    // final prevMonthFirstDay =
+    //     DateTime(focusedDay.year, focusedDay.month - 1, 1);
 
-    final enableMoveNextMonth = nextMonthFirstDay.isBefore(lastDay) ||
-        nextMonthFirstDay.isAtSameMomentAs(lastDay);
-    final enableMovePrevMonth = prevMonthFirstDay.isAfter(today) ||
-        prevMonthFirstDay.isAtSameMomentAs(today);
+    // final enableMoveNextMonth = nextMonthFirstDay.isBefore(lastDay) ||
+    //     nextMonthFirstDay.isAtSameMomentAs(lastDay);
+    // final enableMovePrevMonth = prevMonthFirstDay.isAfter(today) ||
+    //     prevMonthFirstDay.isAtSameMomentAs(today);
     return TableCalendar(
       // 曜日の高さ
       daysOfWeekHeight: 32,
@@ -82,17 +82,17 @@ class _CustomCalendarState extends State<_CustomCalendar> {
         ),
       ),
       // ヘッダーのスタイル
-      headerStyle: HeaderStyle(
+      headerStyle: const HeaderStyle(
         // 2 weeksボタンを非表示
         formatButtonVisible: false,
         leftChevronIcon: Icon(
           Icons.arrow_back_ios_rounded,
-          color: enableMovePrevMonth ? Colors.black : Colors.grey,
+          color: Colors.black,
           size: 20,
         ),
         rightChevronIcon: Icon(
           Icons.arrow_forward_ios_rounded,
-          color: enableMoveNextMonth ? Colors.black : Colors.grey,
+          color: Colors.black,
           size: 20,
         ),
       ),
