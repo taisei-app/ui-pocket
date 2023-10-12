@@ -58,15 +58,15 @@ class _CustomCalendarState extends State<_CustomCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    final prevMonthLastDay = DateTime(focusedDay.year, focusedDay.month, 0);
-    final enableMovePrevMonth = prevMonthLastDay.isAfter(today) ||
-        prevMonthLastDay.isAtSameMomentAs(today);
-
     final nextMonthFirstDay =
         DateTime(focusedDay.year, focusedDay.month + 1, 1);
+    final prevMonthFirstDay =
+        DateTime(focusedDay.year, focusedDay.month - 1, 1);
+
     final enableMoveNextMonth = nextMonthFirstDay.isBefore(lastDay) ||
         nextMonthFirstDay.isAtSameMomentAs(lastDay);
-
+    final enableMovePrevMonth = prevMonthFirstDay.isAfter(today) ||
+        prevMonthFirstDay.isAtSameMomentAs(today);
     return TableCalendar(
       // 曜日の高さ
       daysOfWeekHeight: 32,
@@ -85,40 +85,18 @@ class _CustomCalendarState extends State<_CustomCalendar> {
       headerStyle: HeaderStyle(
         // 2 weeksボタンを非表示
         formatButtonVisible: false,
-        leftChevronIcon: GestureDetector(
-          onTap: () {
-            if (enableMovePrevMonth) {
-              final prevFocusedDay =
-                  focusedDay.subtract(const Duration(days: 30));
-              setState(() {
-                focusedDay =
-                    prevFocusedDay.isAfter(today) ? prevFocusedDay : today;
-              });
-            }
-          },
-          child: Icon(
-            Icons.arrow_back_ios_rounded,
-            color: enableMovePrevMonth ? const Color(0xff222222) : Colors.grey,
-            size: 20,
-          ),
+        leftChevronIcon: Icon(
+          Icons.arrow_back_ios_rounded,
+          color: enableMovePrevMonth ? Colors.black : Colors.grey,
+          size: 20,
         ),
-        rightChevronIcon: GestureDetector(
-          onTap: () {
-            if (enableMoveNextMonth) {
-              final nextFocusedDay = focusedDay.add(const Duration(days: 30));
-              setState(() {
-                focusedDay =
-                    nextFocusedDay.isBefore(lastDay) ? nextFocusedDay : lastDay;
-              });
-            }
-          },
-          child: Icon(
-            Icons.arrow_forward_ios_rounded,
-            color: enableMoveNextMonth ? const Color(0xff222222) : Colors.grey,
-            size: 20,
-          ),
+        rightChevronIcon: Icon(
+          Icons.arrow_forward_ios_rounded,
+          color: enableMoveNextMonth ? Colors.black : Colors.grey,
+          size: 20,
         ),
       ),
+
       // 表示するカレンダーは現在日時から60日間表示
       firstDay: today,
       lastDay: lastDay,
@@ -136,30 +114,26 @@ class _CustomCalendarState extends State<_CustomCalendar> {
       },
       selectedDayPredicate: (day) => isSameDay(day, focusedDay),
       calendarBuilders: CalendarBuilders(
-        headerTitleBuilder: (_, day) {
-          return Center(
-            child: Text(
-              "${day.year}年 ${day.month}月",
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-              ),
+        headerTitleBuilder: (_, day) => Center(
+          child: Text(
+            "${day.year}年 ${day.month}月",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
             ),
-          );
-        },
-        selectedBuilder: (context, day, focusedDay) {
-          return Container(
-            margin: const EdgeInsets.all(0.5),
-            alignment: Alignment.center,
-            color: Colors.black,
-            child: Text(
-              day.day.toString(),
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+          ),
+        ),
+        selectedBuilder: (context, day, focusedDay) => Container(
+          margin: const EdgeInsets.all(0.5),
+          alignment: Alignment.center,
+          color: Colors.black,
+          child: Text(
+            day.day.toString(),
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
-          );
-        },
+          ),
+        ),
         todayBuilder: (_, day, focusedDay) => _CustomCell(
           today: today,
           day: day,
