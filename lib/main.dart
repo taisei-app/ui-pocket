@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:ui_pocket/calendar/table_calendar_sample.dart';
+// import 'package:ui_pocket/calendar/table_calendar_sample.dart';
 import 'package:ui_pocket/stepper/custom_stepper.dart';
 
 void main() {
@@ -22,7 +22,28 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const TableCalendarSample(),
+      home: CustomStepperPage(),
+    );
+  }
+}
+
+class CustomStepperPage extends StatelessWidget {
+  const CustomStepperPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CustomStepper(
+          texts: [
+            "電話番号\n認",
+            "パスワード\n設定",
+            "希望条件\n設定",
+          ],
+          currentStep: 1,
+          steps: 3,
+        ),
+      ),
     );
   }
 }
